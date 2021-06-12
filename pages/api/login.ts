@@ -2,6 +2,9 @@ import Boom from "@hapi/boom";
 import { apiHandler, prisma } from "../../utils.server";
 import bcrypt from 'bcrypt'
 
+import jwt from 'jsonwebtoken'
+import cookie from 'cookie'
+
 async function validate(username, password) {
   // validate the username and password
   const user = await prisma.user.findUnique({
@@ -31,6 +34,16 @@ export default apiHandler()
     const user = await validate(body.username, body.password)
 
     // generate jwt
+
+    const token = jwt.sign({
+      username: user.name
+    }, process.env.JWT_SECRET, { expiresIn: '3 days' })
+
+    res.setHeader("Set-Cookie", cookie.serialize('token', token, {
+      httpOnly: true,
+      path: '/',
+      maxAge: 60 * 60 * 24 * 3
+    }));
 
     res.json({})
   })
