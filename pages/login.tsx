@@ -2,18 +2,38 @@ import axios from "axios"
 import { useRef } from "react"
 import { useMutation } from "react-query"
 
+async function login({ username, password }) {
+  const result = await axios.post(`api/login`, {
+    username, password
+  })
+  return result.data
+}
+
 function LoginForm() {
+
+  const loginMutation = useMutation(login)
+
+  const $username = useRef(null)
+  const $password = useRef(null)
+
+  function onClickLogin() {
+    const username = $username.current.value
+    const password = $password.current.value
+    loginMutation.mutate({ username, password })
+  }
+
   return (
     <>
+      {loginMutation.error && <div style={{ color: 'red' }}>{loginMutation.error.response.data.message}</div>}
       <div>
         <label>Username: </label>
-        <input type="text" />
+        <input ref={$username} type="text" />
       </div>
       <div>
         <label>Password: </label>
-        <input type="password" />
+        <input ref={$password} type="password" />
       </div>
-      <button>Login</button>
+      <button onClick={onClickLogin}>Login</button>
     </>
   )
 }
@@ -43,6 +63,7 @@ function SignUpForm() {
 
   return (
     <>
+      {createAccountMutation.error && <div style={{ color: 'red' }}>{createAccountMutation.error.response.data.message}</div>}
       <div>
         <label>Username: </label>
         <input ref={$username} type="text" />
