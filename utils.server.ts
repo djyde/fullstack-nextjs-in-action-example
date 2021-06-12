@@ -4,6 +4,8 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 import { PrismaClient } from "@prisma/client";
 
+import jwt from 'jsonwebtoken'
+
 // @ts-expect-error
 export const prisma: PrismaClient = global.prisma || new PrismaClient();
 // @ts-expect-error
@@ -29,3 +31,23 @@ export const apiHandler = () =>
       }
     },
   });
+
+export const getUserFromReq = async (req) => {
+  // get JWT `token` on cookies
+  const token = req.cookies['token']
+  try {
+    // if token is invalid, `verify` will throw an error
+    const payload = jwt.verify(token, process.env.JWT_SECRET)
+
+    // find user in database
+    const user = await prisma.user.findUnique({
+      where: {
+        name: payload.username
+      }
+    })
+
+    return user
+  } catch (e) {
+    return null
+  }
+}
