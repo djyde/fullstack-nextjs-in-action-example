@@ -2,6 +2,13 @@ import nc from "next-connect";
 import * as Boom from "@hapi/boom";
 import { NextApiRequest, NextApiResponse } from "next";
 
+import { PrismaClient } from "@prisma/client";
+
+// @ts-expect-error
+export const prisma: PrismaClient = global.prisma || new PrismaClient();
+// @ts-expect-error
+if (process.env.NODE_ENV !== "production") global.prisma = prisma;
+
 export const apiHandler = () =>
   nc<NextApiRequest, NextApiResponse>({
     onError(err, req, res) {
