@@ -1,9 +1,11 @@
 // pages/index.tsx
+import React from 'react'
 
 function IndexPage() {
+
   return (
     <>
-      Hello world
+      hello world
     </>
   )
 }
