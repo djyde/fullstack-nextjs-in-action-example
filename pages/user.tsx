@@ -9,6 +9,10 @@ function UserPage(props: {
     <>
       <div>
         Hello, {props.user.name}
+
+        <div>
+          <a href="/api/logout">Logout</a>
+        </div>
       </div>
     </>
   )
