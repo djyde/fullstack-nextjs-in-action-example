@@ -93,6 +93,10 @@ function EditLinkForm(props: {
   )
 }
 
+async function deleteLink({ linkId }) {
+  await axios.delete(`/api/link/${linkId}`)
+}
+
 function IndexPage(props: {
   user?: {
     name: string
@@ -100,6 +104,14 @@ function IndexPage(props: {
 }) {
 
   const fetchAllLinksQuery = useQuery('fetchAllLinks', fetchAllLinks)
+  const deleteLinkMutation = useMutation(deleteLink, {
+    onSuccess() {
+      queryClient.invalidateQueries('fetchAllLinks')
+    },
+    onError(err) {
+      alert(err.response.data.message)
+    }
+  })
 
   return (
     <>
@@ -124,6 +136,14 @@ function IndexPage(props: {
             <div style={{ marginTop: '1rem' }}>
               <div key={link.id}>
                 <a href={link.url}>{link.title}</a> <span>by: {link.creatorName}</span>
+              </div>
+              <div>
+                <button
+                  disabled={deleteLinkMutation.isLoading}
+                  onClick={_ => deleteLinkMutation.mutate({ linkId: link.id })}
+                >
+                  delete
+                </button>
               </div>
               <div>
                 <EditLinkForm link={link} />
