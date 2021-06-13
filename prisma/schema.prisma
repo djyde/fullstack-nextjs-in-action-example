@@ -11,6 +11,20 @@ generator client {
 }
 
 model User {
-  name String @id
+  name     String @id
   password String
+
+  links  Link[] @relation("link_creator")
+}
+
+model Link {
+  id String @id @default(uuid())
+
+  title String
+  url String
+
+  creatorName String
+  creator   User   @relation(name: "link_creator", fields: [creatorName], references: [name])
+
+  createdAt DateTime @default(now())
 }
