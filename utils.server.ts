@@ -62,3 +62,22 @@ export const authMiddleware = () => async (req, res, next) => {
     next()
   }
 }
+
+export const linkCreatorGuard = (getLinkId: (req) => string) => async (req, res, next) => {
+  const user = req.user
+  const linkId = getLinkId(req)
+  const link = await prisma.link.findUnique({
+    where: {
+      id: linkId
+    },
+    select: {
+      creatorName: true
+    }
+  })
+
+  if (user.name !== link.creatorName) {
+    throw Boom.forbidden('Permission Denined')
+  } else {
+    next()
+  }
+}

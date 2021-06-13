@@ -1,4 +1,5 @@
 // pages/index.tsx
+import { Link } from '@prisma/client'
 import axios from 'axios'
 import React, { useRef } from 'react'
 import { useMutation, useQuery } from 'react-query'
@@ -49,6 +50,49 @@ async function fetchAllLinks() {
   return result.data.data
 }
 
+const editLink = (linkId: string) => async (body: {
+  title?: string,
+  url?: string
+}) => {
+  await axios.put(`/api/link/${linkId}`, body)
+}
+
+function EditLinkForm(props: {
+  link: Link
+}) {
+
+  const $title = React.useRef(null)
+  const $url = React.useRef(null)
+
+  const editLinkMutation = useMutation(editLink(props.link.id), {
+    onSuccess() {
+      queryClient.invalidateQueries('fetchAllLinks')
+    },
+    onError(err) {
+      alert(err.response.data.message)
+    }
+  })
+
+  function onClickSave() {
+    editLinkMutation.mutate({ title: $title.current.value, url: $url.current.value })
+  }
+
+  return (
+    <>
+      <div>
+        <label>URL: </label>
+        <input defaultValue={props.link.url} ref={$url} type="text" />
+      </div>
+      <div>
+        <label>Title: </label>
+        <input defaultValue={props.link.title} ref={$title} type="text" />
+      </div>
+
+      <button disabled={editLinkMutation.isLoading} onClick={onClickSave}>Save</button>
+    </>
+  )
+}
+
 function IndexPage(props: {
   user?: {
     name: string
@@ -77,8 +121,13 @@ function IndexPage(props: {
         {fetchAllLinksQuery.isLoading && <div>Loading...</div>}
         {fetchAllLinksQuery.data?.map(link => {
           return (
-            <div key={link.id}>
-              <a href={link.url}>{link.title}</a>
+            <div style={{ marginTop: '1rem' }}>
+              <div key={link.id}>
+                <a href={link.url}>{link.title}</a> <span>by: {link.creatorName}</span>
+              </div>
+              <div>
+                <EditLinkForm link={link} />
+              </div>
             </div>
           )
         })}
