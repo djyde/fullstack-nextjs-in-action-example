@@ -51,3 +51,14 @@ export const getUserFromReq = async (req) => {
     return null
   }
 }
+
+export const authMiddleware = () => async (req, res, next) => {
+  const user = await getUserFromReq(req)
+
+  if (!user) {
+    throw Boom.forbidden('Please login first')
+  } else {
+    req.user = user
+    next()
+  }
+}
